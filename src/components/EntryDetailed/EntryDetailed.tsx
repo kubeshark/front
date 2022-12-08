@@ -7,6 +7,7 @@ import Queryable from "../UI/Queryable/Queryable";
 import { toast } from "react-toastify";
 import { RecoilState, useRecoilState, useRecoilValue } from "recoil";
 import focusedEntryIdAtom from "../../recoil/focusedEntryId";
+import focusedEntryWorkerAtom from "../../recoil/focusedEntryWorker";
 import TrafficViewerApi from "../TrafficViewer/TrafficViewerApi";
 import TrafficViewerApiAtom from "../../recoil/TrafficViewerApi/atom";
 import queryAtom from "../../recoil/query/atom";
@@ -110,7 +111,7 @@ interface EntrySummaryProps {
 
 const EntrySummary: React.FC<EntrySummaryProps> = ({ entry, namespace }) => {
   return <EntryItem
-    key={`entry-${entry.id}`}
+    key={`item-${entry.worker}-${entry.id}`}
     entry={entry}
     style={{}}
     headingMode={true}
@@ -123,6 +124,7 @@ const EntrySummary: React.FC<EntrySummaryProps> = ({ entry, namespace }) => {
 export const EntryDetailed: React.FC = () => {
 
   const focusedEntryId = useRecoilValue(focusedEntryIdAtom);
+  const focusedEntryWorker = useRecoilValue(focusedEntryWorkerAtom);
   const trafficViewerApi = useRecoilValue(TrafficViewerApiAtom as RecoilState<TrafficViewerApi>)
   const query = useRecoilValue(queryAtom);
   const [isLoading, setIsLoading] = useState(false);
@@ -134,7 +136,7 @@ export const EntryDetailed: React.FC = () => {
     setIsLoading(true);
     (async () => {
       try {
-        const entryData = await trafficViewerApi.getEntry(focusedEntryId, query);
+        const entryData = await trafficViewerApi.getItem(focusedEntryWorker, focusedEntryId, query);
         setEntryData(entryData);
       } catch (error) {
         if (error.response?.data?.type) {
@@ -151,7 +153,7 @@ export const EntryDetailed: React.FC = () => {
       }
     })();
     // eslint-disable-next-line
-  }, [focusedEntryId]);
+  }, [focusedEntryId, focusedEntryWorker]);
 
   return <LoadingWrapper isLoading={isLoading} loaderMargin={50} loaderHeight={60}>
     {entryData && <React.Fragment>

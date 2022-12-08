@@ -10,6 +10,7 @@ import queryAtom from "../../recoil/query";
 import TrafficViewerApiAtom from "../../recoil/TrafficViewerApi";
 import TrafficViewerApi from "../TrafficViewer/TrafficViewerApi";
 import focusedEntryIdAtom from "../../recoil/focusedEntryId";
+import focusedEntryWorkerAtom from "../../recoil/focusedEntryWorker";
 import { toast } from "react-toastify";
 import { MAX_ENTRIES, TOAST_CONTAINER_ID } from "../../configs/Consts";
 import targettingStatusAtom from "../../recoil/targettingStatus";
@@ -65,6 +66,7 @@ export const EntriesList: React.FC<EntriesListProps> = ({
   const query = useRecoilValue(queryAtom);
   const isWsConnectionClosed = ws?.current?.readyState !== WebSocket.OPEN;
   const [focusedEntryId, setFocusedEntryId] = useRecoilState(focusedEntryIdAtom);
+  const [focusedEntryWorker, setFocusedEntryWorker] = useRecoilState(focusedEntryWorkerAtom);
   const [leftOffTop, setLeftOffTop] = useRecoilState(leftOffTopAtom);
   const setTargettingStatus = useSetRecoilState(targettingStatusAtom);
 
@@ -141,9 +143,11 @@ export const EntriesList: React.FC<EntriesListProps> = ({
   const scrollbarVisible = scrollableRef.current?.childWrapperRef.current.clientHeight > scrollableRef.current?.wrapperRef.current.clientHeight;
 
   useEffect(() => {
-    if (!focusedEntryId && entries.length > 0)
+    if (!focusedEntryId && entries.length > 0) {
       setFocusedEntryId(entries[0].id);
-  }, [focusedEntryId, entries, setFocusedEntryId])
+      setFocusedEntryWorker(entries[0].worker);
+    }
+  }, [focusedEntryId, focusedEntryWorker, entries, setFocusedEntryId, setFocusedEntryWorker])
 
   useEffect(() => {
     const newEntries = [...entries];
@@ -159,31 +163,7 @@ export const EntriesList: React.FC<EntriesListProps> = ({
     ws.current.onmessage = (e) => {
       if (!e?.data) return;
       const message = JSON.parse(e.data);
-      switch (message.messageType) {
-      case "entry":
-        setEntries(entriesState => [...entriesState, message.data]);
-        break;
-      case "status":
-        setTargettingStatus(message.targettingStatus);
-        break;
-      case "toast":
-        toast[message.data.type](message.data.text, {
-          theme: "colored",
-          autoClose: message.data.autoClose,
-          pauseOnHover: true,
-          progress: undefined,
-          containerId: TOAST_CONTAINER_ID
-        });
-        break;
-      case "queryMetadata":
-        setTruncatedTimestamp(message.data.truncatedTimestamp);
-        setQueriedTotal(message.data.total);
-        setLeftOffTop(leftOffState => leftOffState === "" ? message.data.leftOff : leftOffState);
-        break;
-      case "startTime":
-        setStartTime(message.data);
-        break;
-      }
+      setEntries(entriesState => [...entriesState, message]);
     }
   }
 
@@ -197,7 +177,7 @@ export const EntriesList: React.FC<EntriesListProps> = ({
         <ScrollableFeedVirtualized ref={scrollableRef} itemHeight={48} marginTop={10} onSnapBroken={onSnapBrokenEvent}>
           {false /* It's because the first child is ignored by ScrollableFeedVirtualized */}
           {memoizedEntries.map(entry => <EntryItem
-            key={`entry-${entry.id}`}
+            key={`item-${entry.worker}-${entry.id}`}
             entry={entry}
             style={{}}
             headingMode={false}

@@ -14,7 +14,7 @@ type TrafficViewerApi = {
   validateQuery: (query: string) => Promise<{ valid: boolean, message: string }>
   targetStatus: () => TargettingStatusPod[]
   fetchEntries: (leftOff: unknown, direction: number, query: unknown, limit: number, timeoutMs: number) => FetchModel
-  getEntry: (entryId: unknown, query: string) => unknown,
+  getItem: (worker: string, id: string, query: string) => unknown,
   replayRequest: (request: { method: string, url: string, data: string, headers: unknown }) => Promise<ResponseModel>,
   webSocket: {
     close: () => void

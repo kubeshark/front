@@ -47,8 +47,8 @@ export default class Api {
     return response.data;
   }
 
-  getEntry = async (id, query) => {
-    const response = await client.get(`/entries/${id}?query=${encodeURIComponent(query)}`);
+  getItem = async (worker, id, query) => {
+    const response = await client.get(`/item/${worker}/${id}?q=${encodeURIComponent(query)}`);
     return response.data;
   }
 

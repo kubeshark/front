@@ -12,6 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import { RecoilRoot, RecoilState, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import entriesAtom from "../../recoil/entries";
 import focusedEntryIdAtom from "../../recoil/focusedEntryId";
+import focusedEntryWorkerAtom from "../../recoil/focusedEntryWorker";
 import queryAtom from "../../recoil/query";
 import trafficViewerApiAtom from "../../recoil/TrafficViewerApi"
 import TrafficViewerApi from "./TrafficViewerApi";
@@ -67,6 +68,7 @@ export const TrafficViewer: React.FC<TrafficViewerProps> = ({
   const classes = useLayoutStyles();
   const setEntries = useSetRecoilState(entriesAtom);
   const setFocusedEntryId = useSetRecoilState(focusedEntryIdAtom);
+  const setFocusedEntryWorker = useSetRecoilState(focusedEntryWorkerAtom);
   const setEntryDetailedConfigAtom = useSetRecoilState(entryDetailedConfigAtom)
   const query = useRecoilValue(queryAtom);
   const setTrafficViewerApiState = useSetRecoilState(trafficViewerApiAtom as RecoilState<TrafficViewerApi>)
@@ -102,13 +104,7 @@ export const TrafficViewer: React.FC<TrafficViewerProps> = ({
   const sendQueryWhenWsOpen = useCallback((leftOff: string, query: string, fetch: number, fetchTimeoutMs: number) => {
     setTimeout(() => {
       if (ws?.current?.readyState === WebSocket.OPEN) {
-        ws.current.send(JSON.stringify({
-          "leftOff": leftOff,
-          "query": query,
-          "enableFullEntries": false,
-          "fetch": fetch,
-          "timeoutMs": fetchTimeoutMs
-        }));
+        ws.current.send(query);
       } else {
         sendQueryWhenWsOpen(leftOff, query, fetch, fetchTimeoutMs);
       }
@@ -119,6 +115,7 @@ export const TrafficViewer: React.FC<TrafficViewerProps> = ({
   const openWebSocket = useCallback((leftOff: string, query: string, resetEntries: boolean, fetch: number, fetchTimeoutMs: number) => {
     if (resetEntries) {
       setFocusedEntryId(null);
+      setFocusedEntryWorker(null);
       setEntries([]);
       setLeftOffTop("");
       setNoMoreDataTop(false);
