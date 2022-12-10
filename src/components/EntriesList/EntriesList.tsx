@@ -4,16 +4,14 @@ import ScrollableFeedVirtualized from "react-scrollable-feed-virtualized";
 import { Entry, EntryItem } from "../EntryListItem/EntryListItem";
 import down from "./assets/downImg.svg";
 import spinner from "./assets/spinner.svg";
-import { RecoilState, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { RecoilState, useRecoilState, useRecoilValue } from "recoil";
 import entriesAtom from "../../recoil/entries";
 import queryAtom from "../../recoil/query";
 import TrafficViewerApiAtom from "../../recoil/TrafficViewerApi";
 import TrafficViewerApi from "../TrafficViewer/TrafficViewerApi";
 import focusedEntryIdAtom from "../../recoil/focusedEntryId";
 import focusedEntryWorkerAtom from "../../recoil/focusedEntryWorker";
-import { toast } from "react-toastify";
-import { MAX_ENTRIES, TOAST_CONTAINER_ID } from "../../configs/Consts";
-import targettingStatusAtom from "../../recoil/targettingStatus";
+import { MAX_ENTRIES } from "../../configs/Consts";
 import leftOffTopAtom from "../../recoil/leftOffTop";
 import Moment from "moment";
 
@@ -68,14 +66,13 @@ export const EntriesList: React.FC<EntriesListProps> = ({
   const [focusedEntryId, setFocusedEntryId] = useRecoilState(focusedEntryIdAtom);
   const [focusedEntryWorker, setFocusedEntryWorker] = useRecoilState(focusedEntryWorkerAtom);
   const [leftOffTop, setLeftOffTop] = useRecoilState(leftOffTopAtom);
-  const setTargettingStatus = useSetRecoilState(targettingStatusAtom);
 
   const trafficViewerApi = useRecoilValue(TrafficViewerApiAtom as RecoilState<TrafficViewerApi>)
 
   const [loadMoreTop, setLoadMoreTop] = useState(false);
   const [isLoadingTop, setIsLoadingTop] = useState(false);
   const [queriedTotal, setQueriedTotal] = useState(0);
-  const [startTime, setStartTime] = useState(0);
+  const [startTime] = useState(0);
   const [truncatedTimestamp, setTruncatedTimestamp] = useState(0);
 
   const leftOffBottom = entries.length > 0 ? entries[entries.length - 1].id : "latest";
